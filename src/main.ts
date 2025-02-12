@@ -28,6 +28,7 @@ is_oa: {{ it.is_oa }}
 `;
 
 const invalidFilenameCharacters = /[\\\/:*?"<>|]/g;
+const doiRegex = /10\.\d{4,9}\/[-._;()/:A-Z0-9]+/gi;
 
 export default class AcademicPaperManagementPlugin extends Plugin {
   settings: Settings = DEFAULT_SETTINGS;
@@ -41,8 +42,19 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       name: "Create a reference note from a DOI",
       callback: () => {
         new DoiInputModal(this.app, async (doi) => {
-          await this.createReferenceFromDOI(doi);
+          const extractedDoi = doi.match(doiRegex)?.[0] ?? doi;
+          await this.createReferenceFromDOI(extractedDoi);
         }).open();
+      },
+    });
+
+    this.addCommand({
+      id: "create-reference-from-doi-clipboard",
+      name: "Create a reference note from the DOI in the clipboard",
+      callback: async () => {
+        const doi = await navigator.clipboard.readText();
+        const extractedDoi = doi.match(doiRegex)?.[0] ?? doi;
+        await this.createReferenceFromDOI(extractedDoi);
       },
     });
   }
