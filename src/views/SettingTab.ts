@@ -2,14 +2,16 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import AcademicPaperManagementPlugin from "../main.ts";
 
 export interface Settings {
-  baseDir: string;
   email: string;
+  directoryTemplate: string;
+  filenameTemplate: string;
   templatePath: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  baseDir: "academic-papers",
   email: "",
+  directoryTemplate: "papers",
+  filenameTemplate: "{{ it.title }}",
   templatePath: "",
 };
 
@@ -26,21 +28,6 @@ export class SettingTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName("Base Directory")
-      .setDesc(
-        "The directory where the reference notes and PDFs will be saved.",
-      )
-      .addText((text) =>
-        text
-          .setPlaceholder("academic-papers")
-          .setValue(this.plugin.settings.baseDir)
-          .onChange((value) => {
-            this.plugin.settings.baseDir = value;
-            this.plugin.saveSettings();
-          })
-      );
-
-    new Setting(containerEl)
       .setName("Email")
       .setDesc("Your email address for the Unpaywall API.")
       .addText((text) =>
@@ -49,6 +36,37 @@ export class SettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.email)
           .onChange((value) => {
             this.plugin.settings.email = value;
+            this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Directory Template")
+      .setDesc(
+        "The template for the directory structure of the reference notes. Use Mustache syntax.",
+      )
+      .addText((text) =>
+        text
+          .setPlaceholder("papers/{{ it.year }}")
+          .setValue(this.plugin.settings.directoryTemplate)
+          .onChange((value) => {
+            this.plugin.settings.directoryTemplate = value;
+            this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Filename Template")
+      .setDesc(
+        "The template for the filenames of the reference notes. Use Mustache syntax.\n" +
+          "Unknown characters in filenames will be replaced by underscores",
+      )
+      .addText((text) =>
+        text
+          .setPlaceholder("{{ it.title }}")
+          .setValue(this.plugin.settings.filenameTemplate)
+          .onChange((value) => {
+            this.plugin.settings.filenameTemplate = value;
             this.plugin.saveSettings();
           })
       );

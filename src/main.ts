@@ -27,6 +27,8 @@ is_oa: {{ it.is_oa }}
 ---
 `;
 
+const invalidFilenameCharacters = /[\\\/:*?"<>|]/g;
+
 export default class AcademicPaperManagementPlugin extends Plugin {
   settings: Settings = DEFAULT_SETTINGS;
 
@@ -65,7 +67,11 @@ export default class AcademicPaperManagementPlugin extends Plugin {
     const apiResponse: UnpaywallResponse = apiUrlResponse.json;
     console.debug(apiResponse);
 
-    const filePath = `${this.settings.baseDir}/${apiResponse.title}`;
+    const dirname = render(this.settings.directoryTemplate, apiResponse)
+      .replace(invalidFilenameCharacters, "_");
+    const filename = render(this.settings.filenameTemplate, apiResponse)
+      .replace(invalidFilenameCharacters, "_");
+    const filePath = `${dirname}/${filename}`;
 
     if (apiResponse.is_oa && apiResponse.best_oa_location?.url_for_pdf) {
       const pdfUrl = apiResponse.best_oa_location.url_for_pdf;
