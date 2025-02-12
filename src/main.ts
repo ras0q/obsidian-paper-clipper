@@ -1,0 +1,97 @@
+import { Plugin, requestUrl } from "obsidian";
+import { DoiInputModal } from "./views/DoiInputModal.ts";
+import { DEFAULT_SETTINGS, Settings, SettingTab } from "./views/SettingTab.ts";
+import { render } from "squirrelly";
+
+// https://unpaywall.org/data-format
+interface UnpaywallResponse {
+  doi: string;
+  title: string;
+  is_oa: boolean;
+  best_oa_location?: {
+    url_for_pdf?: string;
+  };
+}
+
+const fallbackTemplate = `---
+title: "{{ it.title }}"
+author:
+{{ @each(it.z_authors) => val, i }}
+  - "{{ val.given }} {{ val.family }}"
+{{ /each }}
+doi: "{{ it.doi }}"
+url: "{{ it.doi_url }}"
+pdf_url: "[[{{ it.title }}.pdf]]"
+is_oa: {{ it.is_oa }}
+
+---
+`;
+
+export default class AcademicPaperManagementPlugin extends Plugin {
+  settings: Settings = DEFAULT_SETTINGS;
+
+  override async onload() {
+    await this.loadSettings();
+    this.addSettingTab(new SettingTab(this.app, this));
+
+    this.addCommand({
+      id: "create-reference-from-doi",
+      name: "Create a reference note from a DOI",
+      callback: () => {
+        new DoiInputModal(this.app, async (doi) => {
+          await this.createReferenceFromDOI(doi);
+        }).open();
+      },
+    });
+  }
+
+  override onunload() {
+    console.log("unloading Academic Paper Management plugin");
+  }
+
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
+
+  private async createReferenceFromDOI(doi: string) {
+    const apiUrl =
+      `https://api.unpaywall.org/v2/${doi}?email=${this.settings.email}`;
+
+    const apiUrlResponse = await requestUrl(apiUrl);
+    const apiResponse: UnpaywallResponse = apiUrlResponse.json;
+    console.debug(apiResponse);
+
+    const filePath = `${this.settings.baseDir}/${apiResponse.title}`;
+
+    if (apiResponse.is_oa && apiResponse.best_oa_location?.url_for_pdf) {
+      const pdfUrl = apiResponse.best_oa_location.url_for_pdf;
+      const pdfResponse = await requestUrl(pdfUrl);
+      const pdfArrayBuffer = pdfResponse.arrayBuffer;
+      console.debug(`PDF size: ${pdfArrayBuffer.byteLength}`);
+
+      const pdfFilePath = `${filePath}.pdf`;
+      const pdfFile = await this.app.vault.createBinary(
+        pdfFilePath,
+        pdfArrayBuffer,
+      );
+      await this.app.workspace.getLeaf().openFile(pdfFile);
+    }
+
+    const templateFile = this.app.vault.getFileByPath(
+      this.settings.templatePath,
+    );
+
+    const template = templateFile
+      ? await this.app.vault.read(templateFile)
+      : fallbackTemplate;
+    const content = render(template, apiResponse);
+
+    const mdFilePath = `${filePath}.md`;
+    const mdFile = await this.app.vault.create(mdFilePath, content);
+    await this.app.workspace.getLeaf("split").openFile(mdFile);
+  }
+}
