@@ -1,0 +1,26 @@
+name: Release Obsidian plugin
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno install
+      - run: deno task build
+      - run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          gh release create "$tag" \
+            --generate-notes \
+            main.js manifest.json
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

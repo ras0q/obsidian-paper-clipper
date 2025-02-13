@@ -6,5 +6,6 @@
   "description": "Capture and manage academic papers",
   "author": "ras0q",
   "authorUrl": "https://github.com/ras0q",
-  "fundingUrl": "https://buymeacoffee.com/ras0q"
+  "fundingUrl": "https://buymeacoffee.com/ras0q",
+  "idDesktopOnly": false
 }
