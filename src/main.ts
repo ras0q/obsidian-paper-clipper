@@ -77,7 +77,6 @@ export default class AcademicPaperManagementPlugin extends Plugin {
 
     const apiUrlResponse = await requestUrl(apiUrl);
     const apiResponse: UnpaywallResponse = apiUrlResponse.json;
-    console.debug(apiResponse);
 
     const dirname = render(this.settings.directoryTemplate, apiResponse)
       .replace(invalidFilenameCharacters, "_");
@@ -89,7 +88,6 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       const pdfUrl = apiResponse.best_oa_location.url_for_pdf;
       const pdfResponse = await requestUrl(pdfUrl);
       const pdfArrayBuffer = pdfResponse.arrayBuffer;
-      console.debug(`PDF size: ${pdfArrayBuffer.byteLength}`);
 
       const pdfFilePath = `${filePath}.pdf`;
       const pdfFile = await this.app.vault.createBinary(
