@@ -1,7 +1,7 @@
 {
   "id": "paper-clipper",
   "name": "Paper Clipper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.7.2",
   "description": "Capture and manage academic papers",
   "author": "ras0q",
