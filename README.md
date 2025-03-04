@@ -5,7 +5,7 @@
 
 An [Obsidian](https://obsidian.md/) plugin to capture and manage academic papers
 
-<video src="./public/thumbnail.mp4" alt="screenshot" width="100%"></video>
+![thumbnail](./public/thumbnail.gif)
 
 ## Features
 
@@ -18,4 +18,3 @@ An [Obsidian](https://obsidian.md/) plugin to capture and manage academic papers
 - [ ] Extract DOI and metadata from existing PDFs
 - [ ] Auto-organize papers with citation-ready formatting
 - [ ] Web clipper extension to save papers directly from your browser (like Obsidian Web Clipper!)
-
