@@ -75,7 +75,7 @@ export class SettingTab extends PluginSettingTab {
     information.append(informationList);
 
     new Setting(containerEl)
-      .setName("Third-party Services Information")
+      .setName("Third-party services information")
       .setDesc(information);
 
     new Setting(containerEl)
@@ -92,7 +92,7 @@ export class SettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Directory Template")
+      .setName("Directory template")
       .setDesc(
         "The template for the directory structure of the reference notes",
       )
@@ -107,7 +107,7 @@ export class SettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Filename Template")
+      .setName("Filename template")
       .setDesc(
         "The template for the filenames of the reference notes\n" +
           "Unknown characters in filenames will be replaced by underscores",
@@ -123,7 +123,7 @@ export class SettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Template Path")
+      .setName("Template path")
       .setDesc("The path to the template for the reference notes.")
       .addText((text) =>
         text
