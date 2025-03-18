@@ -1,17 +1,8 @@
-import { Plugin, requestUrl } from "obsidian";
+import { Plugin } from "obsidian";
 import { DoiInputModal } from "./views/DoiInputModal.ts";
 import { DEFAULT_SETTINGS, Settings, SettingTab } from "./views/SettingTab.ts";
 import { render } from "squirrelly";
-
-// https://unpaywall.org/data-format
-interface UnpaywallResponse {
-  doi: string;
-  title: string;
-  is_oa: boolean;
-  best_oa_location?: {
-    url_for_pdf?: string;
-  };
-}
+import { fetchReference } from "./clients/unpaywall_clients.ts";
 
 const fallbackTemplate = `---
 title: "{{ it.title }}"
@@ -72,11 +63,7 @@ export default class AcademicPaperManagementPlugin extends Plugin {
   }
 
   private async createReferenceFromDOI(doi: string) {
-    const apiUrl =
-      `https://api.unpaywall.org/v2/${doi}?email=${this.settings.email}`;
-
-    const apiUrlResponse = await requestUrl(apiUrl);
-    const apiResponse: UnpaywallResponse = apiUrlResponse.json;
+    const { apiResponse, pdf } = await fetchReference(doi, this.settings.email);
 
     const dirname = render(this.settings.directoryTemplate, apiResponse)
       .replace(invalidFilenameCharacters, "_");
@@ -84,16 +71,9 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       .replace(invalidFilenameCharacters, "_");
     const filePath = `${dirname}/${filename}`;
 
-    if (apiResponse.is_oa && apiResponse.best_oa_location?.url_for_pdf) {
-      const pdfUrl = apiResponse.best_oa_location.url_for_pdf;
-      const pdfResponse = await requestUrl(pdfUrl);
-      const pdfArrayBuffer = pdfResponse.arrayBuffer;
-
+    if (pdf) {
       const pdfFilePath = `${filePath}.pdf`;
-      const pdfFile = await this.app.vault.createBinary(
-        pdfFilePath,
-        pdfArrayBuffer,
-      );
+      const pdfFile = await this.app.vault.createBinary(pdfFilePath, pdf);
       await this.app.workspace.getLeaf().openFile(pdfFile);
     }
 
