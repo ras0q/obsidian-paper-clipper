@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { base64ToArrayBuffer, Notice, Plugin } from "obsidian";
 import { DoiInputModal } from "./views/DoiInputModal.ts";
 import { DEFAULT_SETTINGS, Settings, SettingTab } from "./views/SettingTab.ts";
 import { render } from "squirrelly";
@@ -47,6 +47,37 @@ export default class AcademicPaperManagementPlugin extends Plugin {
         const extractedDoi = doi.match(doiRegex)?.[0] ?? doi;
         await this.createReferenceFromDOI(extractedDoi);
       },
+    });
+
+    // obsidian://clip-paper?file=papers%2Fexample.pdf&open=true
+    this.registerObsidianProtocolHandler("clip-paper", async (params) => {
+      try {
+        const { file = `papers/${Date.now()}.pdf`, open } = params;
+
+        const copiedBase64 = await navigator.clipboard.readText();
+        const pdf = base64ToArrayBuffer(copiedBase64);
+
+        const filePath = decodeURIComponent(file);
+        const pdfFile = this.app.vault.getFileByPath(filePath);
+        if (pdfFile) {
+          const confirm = globalThis.confirm(
+            `The file ${filePath} already exists. Do you want to overwrite it?`,
+          );
+          if (!confirm) return;
+          await this.app.vault.modifyBinary(pdfFile, pdf);
+        } else {
+          await this.app.vault.createBinary(filePath, pdf);
+        }
+
+        if (open) {
+          const createdFile = this.app.vault.getFileByPath(filePath);
+          if (createdFile) {
+            await this.app.workspace.getLeaf().openFile(createdFile);
+          }
+        }
+      } catch (e) {
+        new Notice(e as string);
+      }
     });
   }
 

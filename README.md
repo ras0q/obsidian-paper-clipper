@@ -10,12 +10,61 @@ An [Obsidian](https://obsidian.md/) plugin to capture and manage academic papers
 ## Features
 
 > [!CAUTION]
-> This plugin is work in progress. Please report any issues you encounter.
+> This plugin is a work in progress. Please report any issues you encounter.
 >
 > [Discussion on Reddit](https://www.reddit.com/r/ObsidianMD/comments/1ioa6ai/creating_a_plugin_that_clips_academic_papers_by/)
 
 - [x] Fetch full-text PDFs and metadata from open access sources using a DOI
 - [ ] Extract DOI and metadata from existing PDFs
 - [ ] Auto-organize papers with citation-ready formatting
-- [ ] Web clipper extension to save papers directly from your browser (like
-      Obsidian Web Clipper!)
+- [x] Import PDFs into Obsidian with a [bookmarklet](#importing-pdfs)
+
+### Importing PDFs
+
+This plugin implements a custom URI scheme to import PDFs into Obsidian.
+
+```plaintext
+obsidian://clip-paper?file=<file-path>&open=<true|false>
+```
+
+- `file` (optional): The path to the PDF file relative to the vault root
+- `open` (optional): Whether to open the PDF after importing
+
+You can use the following bookmarklet to import PDFs into Obsidian:
+
+```js
+javascript:(async()=>{try{const url=location.href;if(!url.endsWith(".pdf"))throw"not a PDF file";const title=(document.title||document.location.pathname).replace(/[\\\/:*?"<>|]/g,"");const filePath=`papers/${title}.pdf`;const pdf=await(await fetch(url)).bytes();const binaryString=pdf.reduce((acc,byte)=>acc+String.fromCharCode(byte),"");const base64Data=btoa(binaryString);await navigator.clipboard.writeText(base64Data);location.href=`obsidian://clip-paper?file=${encodeURIComponent(filePath)}&open=true`;}catch(error){alert(`Error: ${error}`);console.error(error);}})();
+```
+
+<details>
+
+<summary>Full code</summary>
+
+```js
+javascript:(async () => {
+  try {
+    const url = location.href;
+    if (!url.endsWith(".pdf")) throw "not a PDF file";
+
+    const title = (document.title || document.location.pathname)
+      .replace(/[\\\/:*?"<>|]/g, "");
+    const filePath = `papers/${title}.pdf`;
+
+    const pdf = await (await fetch(url)).bytes();
+
+    const binaryString = pdf.reduce(
+      (acc, byte) => acc + String.fromCharCode(byte),
+      "",
+    );
+    const base64Data = btoa(binaryString);
+
+    await navigator.clipboard.writeText(base64Data);
+    location.href = `obsidian://clip-paper?file=${encodeURIComponent(filePath)}&open=true`;
+  } catch (error) {
+    alert(`Error: ${error}`);
+    console.error(error);
+  }
+})();
+```
+
+</details>

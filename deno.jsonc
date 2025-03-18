@@ -9,6 +9,11 @@
     "node_modules",
     "main.js"
   ],
+  "fmt": {
+    "exclude": [
+      "README.md"
+    ]
+  },
   "imports": {
     "@std/semver": "jsr:@std/semver@^1.0.4",
     "esbuild": "npm:esbuild@^0.25.0",
