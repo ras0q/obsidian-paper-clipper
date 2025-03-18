@@ -10,6 +10,7 @@
     "main.js"
   ],
   "imports": {
+    "@std/semver": "jsr:@std/semver@^1.0.4",
     "esbuild": "npm:esbuild@^0.25.0",
     "obsidian": "npm:obsidian@^1.7.2",
     "squirrelly": "npm:squirrelly@^9.1.0"
@@ -18,6 +19,7 @@
   "tasks": {
     "build": "deno task esbuild --minify",
     "dev": "deno task esbuild --watch --sourcemap=inline",
-    "esbuild": "esbuild ./src/main.ts --bundle --external:obsidian --format=cjs --target=es6 --outfile=./main.js"
+    "esbuild": "esbuild ./src/main.ts --bundle --external:obsidian --format=cjs --target=es6 --outfile=./main.js",
+    "bump": "deno --allow-write ./scripts/bump-version.ts"
   }
 }
