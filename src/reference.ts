@@ -20,7 +20,7 @@ interface UnpaywallResponse {
   [key: string]: unknown;
 }
 
-const invalidFilenameCharacters = /[\\\/:*?"<>|]/g;
+const invalidFilenameCharacters = /[:*?"<>|]/g;
 
 export class Reference {
   data: UnpaywallResponse;

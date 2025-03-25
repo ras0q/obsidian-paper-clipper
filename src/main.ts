@@ -129,6 +129,7 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       this.settings.pdfPathTemplate,
       { escape: true },
     );
+    await this.prepareFolder(pdfPath);
 
     let pdfFile = this.app.vault.getFileByPath(pdfPath);
     if (pdfFile) {
@@ -158,8 +159,17 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       this.settings.referencePathTemplate,
       { escape: true },
     );
+    await this.prepareFolder(referencePath);
+
     const referenceFile = await this.app.vault.create(referencePath, content);
 
     await this.app.workspace.getLeaf("split").openFile(referenceFile);
+  }
+
+  private async prepareFolder(path: string) {
+    const dirPath = path.split("/").slice(0, -1).join("/");
+    if (this.app.vault.getFolderByPath(dirPath) === null) {
+      await this.app.vault.createFolder(dirPath);
+    }
   }
 }
