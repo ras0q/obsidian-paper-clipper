@@ -33,7 +33,7 @@ obsidian://clip-paper?file=<file-path>&open=<true|false>
 You can use the following bookmarklet to import PDFs into Obsidian:
 
 ```js
-javascript:(async()=>{try{const url=location.href;if(!url.endsWith(".pdf"))throw"not a PDF file";const title=(document.title||document.location.pathname).replace(/[\\\/:*?"<>|]/g,"");const filePath=`papers/${title}.pdf`;const pdf=await(await fetch(url)).bytes();const binaryString=pdf.reduce((acc,byte)=>acc+String.fromCharCode(byte),"");const base64Data=btoa(binaryString);await navigator.clipboard.writeText(base64Data);location.href=`obsidian://clip-paper?file=${encodeURIComponent(filePath)}&open=true`;}catch(error){alert(`Error: ${error}`);console.error(error);}})();
+javascript:(async()=>{try{const a=location.href,b=await(await fetch(a)).bytes(),c=b.reduce((d,e)=>d+String.fromCharCode(e),""),f=btoa(c);await navigator.clipboard.writeText(f);location.href="obsidian://clip-paper?clipboard=base64"}catch(a){alert(`Error: ${a}`);console.error(a)}})();
 ```
 
 <details>
@@ -44,12 +44,6 @@ javascript:(async()=>{try{const url=location.href;if(!url.endsWith(".pdf"))throw
 javascript:(async () => {
   try {
     const url = location.href;
-    if (!url.endsWith(".pdf")) throw "not a PDF file";
-
-    const title = (document.title || document.location.pathname)
-      .replace(/[\\\/:*?"<>|]/g, "");
-    const filePath = `papers/${title}.pdf`;
-
     const pdf = await (await fetch(url)).bytes();
 
     const binaryString = pdf.reduce(
@@ -59,7 +53,7 @@ javascript:(async () => {
     const base64Data = btoa(binaryString);
 
     await navigator.clipboard.writeText(base64Data);
-    location.href = `obsidian://clip-paper?file=${encodeURIComponent(filePath)}&open=true`;
+    location.href = `obsidian://clip-paper?clipboard=base64`;
   } catch (error) {
     alert(`Error: ${error}`);
     console.error(error);

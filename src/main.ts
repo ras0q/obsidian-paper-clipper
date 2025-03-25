@@ -38,11 +38,18 @@ export default class AcademicPaperManagementPlugin extends Plugin {
           initialValue: "",
         });
         const doi = await modal.awaitInput();
+        if (!doi) return;
 
-        if (doi) {
-          const extractedDoi = doi.match(doiRegex)?.[0] ?? doi;
-          await this.createReferenceFromDOI(extractedDoi);
-        }
+        const extractedDoi = doi.match(doiRegex)?.[0] ?? doi;
+        const reference = await Reference.fromDOI(
+          extractedDoi,
+          this.settings.email,
+        );
+
+        const pdf = await reference.fetchPDF();
+        if (pdf) await this.savePDF(reference, pdf);
+
+        await this.generateReferenceNote(reference);
       },
     });
 
@@ -51,15 +58,25 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       name: "Create a reference note from the DOI in the clipboard",
       callback: async () => {
         const doi = await navigator.clipboard.readText();
+
         const extractedDoi = doi.match(doiRegex)?.[0] ?? doi;
-        await this.createReferenceFromDOI(extractedDoi);
+        const reference = await Reference.fromDOI(
+          extractedDoi,
+          this.settings.email,
+        );
+
+        const pdf = await reference.fetchPDF();
+        if (pdf) await this.savePDF(reference, pdf);
+
+        await this.generateReferenceNote(reference);
       },
     });
 
-    // obsidian://clip-paper?open=true
+    // obsidian://clip-paper?clipboard=base64
     this.registerObsidianProtocolHandler("clip-paper", async (params) => {
       try {
-        const { open } = params;
+        const { clipboard } = params;
+        if (clipboard !== "base64") throw 'For now, only "base64" is supported';
 
         const copiedBase64 = await navigator.clipboard.readText();
         const pdf = base64ToArrayBuffer(copiedBase64);
@@ -76,7 +93,7 @@ export default class AcademicPaperManagementPlugin extends Plugin {
         const modifiedTitle = await titleModal.awaitInput();
         if (!modifiedTitle) return;
 
-        new Notice(`Searching the references for \n"${modifiedTitle}"...`);
+        new Notice(`Searching the references for "${modifiedTitle}"...`);
         const references = await Reference.searchFromTitle(
           modifiedTitle,
           this.settings.email,
@@ -86,28 +103,8 @@ export default class AcademicPaperManagementPlugin extends Plugin {
         const bestReference = await referencesModal.awaitInput();
         if (!bestReference) return;
 
-        const pdfPath = bestReference.parseTemplate(
-          this.settings.pdfPathTemplate,
-          { escape: true },
-        );
-
-        const pdfFile = this.app.vault.getFileByPath(pdfPath);
-        if (pdfFile) {
-          const confirm = globalThis.confirm(
-            `The file ${pdfPath} already exists. Do you want to overwrite it?`,
-          );
-          if (!confirm) return;
-          await this.app.vault.modifyBinary(pdfFile, pdf);
-        } else {
-          await this.app.vault.createBinary(pdfPath, pdf);
-        }
-
-        if (open) {
-          const createdFile = this.app.vault.getFileByPath(pdfPath);
-          if (createdFile) {
-            await this.app.workspace.getLeaf().openFile(createdFile);
-          }
-        }
+        await this.savePDF(bestReference, pdf);
+        await this.generateReferenceNote(bestReference);
       } catch (e) {
         console.error(e);
         new Notice(e as string);
@@ -127,22 +124,27 @@ export default class AcademicPaperManagementPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  private async createReferenceFromDOI(doi: string) {
-    const reference = await Reference.fromDOI(doi, this.settings.email);
-    const pdf = await reference.fetchPDF();
-    if (pdf === null) {
-      new Notice("Failed to fetch the PDF of the paper.");
-      return;
+  private async savePDF(reference: Reference, pdf: ArrayBuffer) {
+    const pdfPath = reference.parseTemplate(
+      this.settings.pdfPathTemplate,
+      { escape: true },
+    );
+
+    let pdfFile = this.app.vault.getFileByPath(pdfPath);
+    if (pdfFile) {
+      const confirm = globalThis.confirm(
+        `The file ${pdfPath} already exists. Do you want to overwrite it?`,
+      );
+      if (!confirm) return;
+      await this.app.vault.modifyBinary(pdfFile, pdf);
+    } else {
+      pdfFile = await this.app.vault.createBinary(pdfPath, pdf);
     }
 
-    if (pdf) {
-      const pdfPath = reference.parseTemplate(this.settings.pdfPathTemplate, {
-        escape: true,
-      });
-      const pdfFile = await this.app.vault.createBinary(pdfPath, pdf);
-      await this.app.workspace.getLeaf().openFile(pdfFile);
-    }
+    await this.app.workspace.getLeaf().openFile(pdfFile);
+  }
 
+  private async generateReferenceNote(reference: Reference) {
     const templateFile = this.app.vault.getFileByPath(
       this.settings.templatePath,
     );
@@ -157,6 +159,7 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       { escape: true },
     );
     const referenceFile = await this.app.vault.create(referencePath, content);
+
     await this.app.workspace.getLeaf("split").openFile(referenceFile);
   }
 }
