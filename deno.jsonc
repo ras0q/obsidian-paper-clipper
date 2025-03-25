@@ -26,6 +26,6 @@
     "build": "deno task esbuild --minify",
     "dev": "deno task esbuild --watch --sourcemap=inline",
     "esbuild": "esbuild ./src/main.ts --bundle --external:obsidian --format=cjs --target=es6 --outfile=./main.js",
-    "bump": "deno --allow-write ./scripts/bump-version.ts"
+    "bump": "deno --allow-write ./scripts/bump.ts"
   }
 }
