@@ -1,6 +1,6 @@
 // WARNING: Reference class depends on the Unpaywall API.
 
-import { requestUrl } from "obsidian";
+import { Notice, requestUrl } from "obsidian";
 import { render } from "squirrelly";
 
 const API_BASE_URL = "https://api.unpaywall.org/v2";
@@ -27,10 +27,16 @@ export class Reference {
     const apiUrl = new URL(`${API_BASE_URL}/${doi}`);
     apiUrl.searchParams.set("email", email);
 
-    const apiResponse: UnpaywallResponse =
-      (await requestUrl(apiUrl.toString())).json;
+    try {
+      const apiResponse: UnpaywallResponse =
+        (await requestUrl(apiUrl.toString())).json;
 
-    return new Reference(apiResponse);
+      return new Reference(apiResponse);
+    } catch (e) {
+      new Notice(e as string);
+
+      throw e;
+    }
   }
 
   static async fromTitle(title: string, email: string): Promise<Reference[]> {
@@ -38,10 +44,16 @@ export class Reference {
     apiUrl.searchParams.set("query", title);
     apiUrl.searchParams.set("email", email);
 
-    const apiResponse: UnpaywallResponse[] =
-      (await requestUrl(apiUrl.toString())).json;
+    try {
+      const apiResponse: { results: UnpaywallResponse[] } =
+        (await requestUrl(apiUrl.toString())).json;
 
-    return apiResponse.map((data) => new Reference(data));
+      return apiResponse.results.map((data) => new Reference(data));
+    } catch (e) {
+      new Notice(e as string);
+
+      throw e;
+    }
   }
 
   async fetchPDF(): Promise<ArrayBuffer | null> {
