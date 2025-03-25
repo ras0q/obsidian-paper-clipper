@@ -20,6 +20,8 @@ interface UnpaywallResponse {
   [key: string]: unknown;
 }
 
+const invalidFilenameCharacters = /[\\\/:*?"<>|]/g;
+
 export class Reference {
   data: UnpaywallResponse;
 
@@ -78,7 +80,12 @@ export class Reference {
     return pdfResponse.arrayBuffer;
   }
 
-  parseTemplate(template: string): string {
-    return render(template, this.data);
+  parseTemplate(template: string, option: {
+    escape: boolean;
+  } = { escape: false }): string {
+    const parsed = render(template, this.data);
+    return option?.escape
+      ? parsed.replace(invalidFilenameCharacters, "_")
+      : parsed;
   }
 }

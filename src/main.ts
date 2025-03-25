@@ -19,7 +19,6 @@ is_oa: {{ it.is_oa }}
 ---
 `;
 
-const invalidFilenameCharacters = /[\\\/:*?"<>|]/g;
 const doiRegex = /10\.\d{4,9}\/[-._;()/:A-Z0-9]+/gi;
 
 export default class AcademicPaperManagementPlugin extends Plugin {
@@ -87,27 +86,24 @@ export default class AcademicPaperManagementPlugin extends Plugin {
         const bestReference = await referencesModal.awaitInput();
         if (!bestReference) return;
 
-        const dirname = bestReference
-          .parseTemplate(this.settings.directoryTemplate)
-          .replace(invalidFilenameCharacters, "_");
-        const filename = bestReference
-          .parseTemplate(this.settings.filenameTemplate)
-          .replace(invalidFilenameCharacters, "_");
-        const filePath = `${dirname}/${filename.replace(/\.pdf$/, "")}.pdf`;
+        const pdfPath = bestReference.parseTemplate(
+          this.settings.pdfPathTemplate,
+          { escape: true },
+        );
 
-        const pdfFile = this.app.vault.getFileByPath(filePath);
+        const pdfFile = this.app.vault.getFileByPath(pdfPath);
         if (pdfFile) {
           const confirm = globalThis.confirm(
-            `The file ${filePath} already exists. Do you want to overwrite it?`,
+            `The file ${pdfPath} already exists. Do you want to overwrite it?`,
           );
           if (!confirm) return;
           await this.app.vault.modifyBinary(pdfFile, pdf);
         } else {
-          await this.app.vault.createBinary(filePath, pdf);
+          await this.app.vault.createBinary(pdfPath, pdf);
         }
 
         if (open) {
-          const createdFile = this.app.vault.getFileByPath(filePath);
+          const createdFile = this.app.vault.getFileByPath(pdfPath);
           if (createdFile) {
             await this.app.workspace.getLeaf().openFile(createdFile);
           }
@@ -139,17 +135,11 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       return;
     }
 
-    const dirname = reference
-      .parseTemplate(this.settings.directoryTemplate)
-      .replace(invalidFilenameCharacters, "_");
-    const filename = reference
-      .parseTemplate(this.settings.filenameTemplate)
-      .replace(invalidFilenameCharacters, "_");
-    const filePath = `${dirname}/${filename}`;
-
     if (pdf) {
-      const pdfFilePath = `${filePath}.pdf`;
-      const pdfFile = await this.app.vault.createBinary(pdfFilePath, pdf);
+      const pdfPath = reference.parseTemplate(this.settings.pdfPathTemplate, {
+        escape: true,
+      });
+      const pdfFile = await this.app.vault.createBinary(pdfPath, pdf);
       await this.app.workspace.getLeaf().openFile(pdfFile);
     }
 
@@ -162,8 +152,11 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       : fallbackTemplate;
     const content = reference.parseTemplate(template);
 
-    const mdFilePath = `${filePath}.md`;
-    const mdFile = await this.app.vault.create(mdFilePath, content);
-    await this.app.workspace.getLeaf("split").openFile(mdFile);
+    const referencePath = reference.parseTemplate(
+      this.settings.referencePathTemplate,
+      { escape: true },
+    );
+    const referenceFile = await this.app.vault.create(referencePath, content);
+    await this.app.workspace.getLeaf("split").openFile(referenceFile);
   }
 }

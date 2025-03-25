@@ -3,15 +3,15 @@ import AcademicPaperManagementPlugin from "../main.ts";
 
 export interface Settings {
   email: string;
-  directoryTemplate: string;
-  filenameTemplate: string;
+  pdfPathTemplate: string;
+  referencePathTemplate: string;
   templatePath: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   email: "",
-  directoryTemplate: "papers",
-  filenameTemplate: "{{ it.title }}",
+  pdfPathTemplate: "Papers/{{ it.year }}/{{ it.title }}.pdf",
+  referencePathTemplate: "Papers/{{ it.year }}/{{ it.title }}.md",
   templatePath: "",
 };
 
@@ -92,32 +92,33 @@ export class SettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Directory template")
+      .setName("PDF Path Template")
       .setDesc(
-        "The template for the directory structure of the reference notes",
+        "The template for the path of the PDF files\n" +
+          "Unknown characters in filenames will be replaced by underscores",
       )
       .addText((text) =>
         text
-          .setPlaceholder("papers/{{ it.year }}")
-          .setValue(this.plugin.settings.directoryTemplate)
+          .setPlaceholder(DEFAULT_SETTINGS.pdfPathTemplate)
+          .setValue(this.plugin.settings.pdfPathTemplate)
           .onChange((value) => {
-            this.plugin.settings.directoryTemplate = value;
+            this.plugin.settings.pdfPathTemplate = value;
             this.plugin.saveSettings();
           })
       );
 
     new Setting(containerEl)
-      .setName("Filename template")
+      .setName("Reference Path Template")
       .setDesc(
-        "The template for the filenames of the reference notes\n" +
+        "The template for the path of the reference notes\n" +
           "Unknown characters in filenames will be replaced by underscores",
       )
       .addText((text) =>
         text
-          .setPlaceholder("{{ it.title }}")
-          .setValue(this.plugin.settings.filenameTemplate)
+          .setPlaceholder(DEFAULT_SETTINGS.referencePathTemplate)
+          .setValue(this.plugin.settings.referencePathTemplate)
           .onChange((value) => {
-            this.plugin.settings.filenameTemplate = value;
+            this.plugin.settings.referencePathTemplate = value;
             this.plugin.saveSettings();
           })
       );
