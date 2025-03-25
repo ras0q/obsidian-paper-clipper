@@ -1,8 +1,7 @@
 import { base64ToArrayBuffer, Notice, Plugin } from "obsidian";
 import { DoiInputModal } from "./views/DoiInputModal.ts";
 import { DEFAULT_SETTINGS, Settings, SettingTab } from "./views/SettingTab.ts";
-import { render } from "squirrelly";
-import { fetchReference } from "./clients/unpaywall_clients.ts";
+import { Reference } from "./reference.ts";
 
 const fallbackTemplate = `---
 title: "{{ it.title }}"
@@ -94,11 +93,18 @@ export default class AcademicPaperManagementPlugin extends Plugin {
   }
 
   private async createReferenceFromDOI(doi: string) {
-    const { apiResponse, pdf } = await fetchReference(doi, this.settings.email);
+    const reference = await Reference.fromDOI(doi, this.settings.email);
+    const pdf = await reference.fetchPDF();
+    if (pdf === null) {
+      new Notice("Failed to fetch the PDF of the paper.");
+      return;
+    }
 
-    const dirname = render(this.settings.directoryTemplate, apiResponse)
+    const dirname = reference
+      .parseTemplate(this.settings.directoryTemplate)
       .replace(invalidFilenameCharacters, "_");
-    const filename = render(this.settings.filenameTemplate, apiResponse)
+    const filename = reference
+      .parseTemplate(this.settings.filenameTemplate)
       .replace(invalidFilenameCharacters, "_");
     const filePath = `${dirname}/${filename}`;
 
@@ -115,7 +121,7 @@ export default class AcademicPaperManagementPlugin extends Plugin {
     const template = templateFile
       ? await this.app.vault.read(templateFile)
       : fallbackTemplate;
-    const content = render(template, apiResponse);
+    const content = reference.parseTemplate(template);
 
     const mdFilePath = `${filePath}.md`;
     const mdFile = await this.app.vault.create(mdFilePath, content);
