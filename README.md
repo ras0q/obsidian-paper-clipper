@@ -59,3 +59,8 @@ javascript:(async () => {
 ```
 
 </details>
+
+> [!CAUTION]
+> Due to clipboard permission requirements, this bookmarklet may not work in some browsers' default PDF viewers.
+> If you encounter issues, try using a different PDF viewer.
+> By the way, my favorite PDF viewer is [Google Scholar PDF Reader](https://chromewebstore.google.com/detail/google-scholar-pdf-reader/dahenjhkoodjbpjheillcadbppiidmhp)! 😉
