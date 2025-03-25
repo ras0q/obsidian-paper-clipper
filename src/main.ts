@@ -1,8 +1,9 @@
 import { base64ToArrayBuffer, Notice, Plugin } from "obsidian";
-import { DoiInputModal } from "./views/DoiInputModal.ts";
-import { DEFAULT_SETTINGS, Settings, SettingTab } from "./views/SettingTab.ts";
 import { Reference } from "./reference.ts";
 import { extractPDFTitle } from "./services/pdf_extraction.ts";
+import { InputModal } from "./views/InputModal.ts";
+import { ReferencesModal } from "./views/ReferencesModal.ts";
+import { DEFAULT_SETTINGS, Settings, SettingTab } from "./views/SettingTab.ts";
 
 const fallbackTemplate = `---
 title: "{{ it.title }}"
@@ -31,11 +32,18 @@ export default class AcademicPaperManagementPlugin extends Plugin {
     this.addCommand({
       id: "create-reference-from-doi",
       name: "Create a reference note from a DOI",
-      callback: () => {
-        new DoiInputModal(this.app, async (doi) => {
+      callback: async () => {
+        const modal = new InputModal(this.app, {
+          name: "DOI",
+          placeholder: "10.1000/xyz123",
+          initialValue: "",
+        });
+        const doi = await modal.awaitInput();
+
+        if (doi) {
           const extractedDoi = doi.match(doiRegex)?.[0] ?? doi;
           await this.createReferenceFromDOI(extractedDoi);
-        }).open();
+        }
       },
     });
 
@@ -49,7 +57,7 @@ export default class AcademicPaperManagementPlugin extends Plugin {
       },
     });
 
-    // obsidian://clip-paper?file=papers%2Fexample.pdf&open=true
+    // obsidian://clip-paper?open=true
     this.registerObsidianProtocolHandler("clip-paper", async (params) => {
       try {
         const { open } = params;
@@ -58,11 +66,26 @@ export default class AcademicPaperManagementPlugin extends Plugin {
         const pdf = base64ToArrayBuffer(copiedBase64);
 
         const title = await extractPDFTitle(pdf.slice(0));
-        const references = await Reference.fromTitle(
-          title,
+
+        const titleModal = new InputModal(this.app, {
+          name: "Paper title",
+          placeholder: "Title of the paper",
+          initialValue: title.length > 0
+            ? title
+            : "Title of the paper could not be extracted",
+        });
+        const modifiedTitle = await titleModal.awaitInput();
+        if (!modifiedTitle) return;
+
+        new Notice(`Searching the references for \n"${modifiedTitle}"...`);
+        const references = await Reference.searchFromTitle(
+          modifiedTitle,
           this.settings.email,
         );
-        const bestReference = references[0];
+
+        const referencesModal = new ReferencesModal(this.app, references);
+        const bestReference = await referencesModal.awaitInput();
+        if (!bestReference) return;
 
         const dirname = bestReference
           .parseTemplate(this.settings.directoryTemplate)

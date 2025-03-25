@@ -13,11 +13,15 @@ interface UnpaywallResponse {
   best_oa_location?: {
     url_for_pdf?: string;
   };
+  z_authors: {
+    given: string;
+    family: string;
+  }[];
   [key: string]: unknown;
 }
 
 export class Reference {
-  private data: UnpaywallResponse;
+  data: UnpaywallResponse;
 
   constructor(data: UnpaywallResponse) {
     this.data = data;
@@ -39,16 +43,23 @@ export class Reference {
     }
   }
 
-  static async fromTitle(title: string, email: string): Promise<Reference[]> {
+  static async searchFromTitle(
+    title: string,
+    email: string,
+  ): Promise<Reference[]> {
     const apiUrl = new URL(`${API_BASE_URL}/search`);
-    apiUrl.searchParams.set("query", title);
+    apiUrl.searchParams.set("query", `"${title}"`);
     apiUrl.searchParams.set("email", email);
 
     try {
-      const apiResponse: { results: UnpaywallResponse[] } =
-        (await requestUrl(apiUrl.toString())).json;
+      const apiResponse: {
+        results: {
+          score: number;
+          response: UnpaywallResponse;
+        }[];
+      } = (await requestUrl(apiUrl.toString())).json;
 
-      return apiResponse.results.map((data) => new Reference(data));
+      return apiResponse.results.map((data) => new Reference(data.response));
     } catch (e) {
       new Notice(e as string);
 
