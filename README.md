@@ -15,7 +15,7 @@ An [Obsidian](https://obsidian.md/) plugin to capture and manage academic papers
 > [Discussion on Reddit](https://www.reddit.com/r/ObsidianMD/comments/1ioa6ai/creating_a_plugin_that_clips_academic_papers_by/)
 
 - [x] Fetch full-text PDFs and metadata from open access sources using a DOI
-- [ ] Extract DOI and metadata from existing PDFs
+- [x] Extract DOI and metadata from existing PDFs
 - [ ] Auto-organize papers with citation-ready formatting
 - [x] Import PDFs into Obsidian with a [bookmarklet](#importing-pdfs)
 
@@ -24,11 +24,8 @@ An [Obsidian](https://obsidian.md/) plugin to capture and manage academic papers
 This plugin implements a custom URI scheme to import PDFs into Obsidian.
 
 ```plaintext
-obsidian://clip-paper?file=<file-path>&open=<true|false>
+obsidian://clip-paper?clipboard=base64
 ```
-
-- `file` (optional): The path to the PDF file relative to the vault root
-- `open` (optional): Whether to open the PDF after importing
 
 You can use the following bookmarklet to import PDFs into Obsidian:
 
