@@ -9,12 +9,37 @@ export async function extractPDFTitle(pdf: ArrayBuffer) {
 
   const page = await pdfDocument.getPage(1);
   const items = (await page.getTextContent()).items as TextItem[];
-  const sortedItems = items
-    .filter((i) =>
-      i.str.length > 0 && i.height > 0 &&
+
+  const combinedItems: TextItem[] = [];
+  let currentGroup: TextItem | null = null;
+  for (const item of items) {
+    if (
+      item.str.length === 0 || item.height === 0 ||
       // Check if the item is not rotated
-      i.transform[1] === 0 && i.transform[2] === 0
-    )
+      item.transform[1] !== 0 || item.transform[2] !== 0
+    ) {
+      continue;
+    }
+
+    if (!currentGroup) {
+      currentGroup = { ...item };
+    } else if (
+      currentGroup.height === item.height &&
+      currentGroup.fontName === item.fontName
+    ) {
+      // Combine with current group
+      currentGroup.str += " " + item.str;
+    } else {
+      combinedItems.push(currentGroup);
+      currentGroup = null;
+    }
+  }
+
+  if (currentGroup) {
+    combinedItems.push(currentGroup);
+  }
+
+  const sortedItems = combinedItems
     .sort((a, b) => b.height - a.height);
 
   return sortedItems[0].str;
