@@ -2,9 +2,11 @@
   "version": "4",
   "specifiers": {
     "jsr:@std/semver@^1.0.4": "1.0.4",
+    "npm:@types/node@*": "22.5.4",
     "npm:esbuild@0.25": "0.25.0",
     "npm:esbuild@0.25.0": "0.25.0",
     "npm:obsidian@^1.7.2": "1.7.2_@codemirror+state@6.4.1_@codemirror+view@6.34.1",
+    "npm:pdfjs-dist@^5.0.375": "5.0.375",
     "npm:squirrelly@^9.1.0": "9.1.0"
   },
   "jsr": {
@@ -99,6 +101,51 @@
     "@esbuild/win32-x64@0.25.0": {
       "integrity": "sha512-ZENoHJBxA20C2zFzh6AI4fT6RraMzjYw4xKWemRTRmRVtN9c5DcH9r/f2ihEkMjOW5eGgrwCslG/+Y/3bL+DHQ=="
     },
+    "@napi-rs/canvas-android-arm64@0.1.68": {
+      "integrity": "sha512-h1KcSR4LKLfRfzeBH65xMxbWOGa1OtMFQbCMVlxPCkN1Zr+2gK+70pXO5ktojIYcUrP6KDcOwoc8clho5ccM/w=="
+    },
+    "@napi-rs/canvas-darwin-arm64@0.1.68": {
+      "integrity": "sha512-/VURlrAD4gDoxW1GT/b0nP3fRz/fhxmHI/xznTq2FTwkQLPOlLkDLCvTmQ7v6LtGKdc2Ed6rvYpRan+JXThInQ=="
+    },
+    "@napi-rs/canvas-darwin-x64@0.1.68": {
+      "integrity": "sha512-tEpvGR6vCLTo1Tx9wmDnoOKROpw57wiCWwCpDOuVlj/7rqEJOUYr9ixW4aRJgmeGBrZHgevI0EURys2ER6whmg=="
+    },
+    "@napi-rs/canvas-linux-arm-gnueabihf@0.1.68": {
+      "integrity": "sha512-U9xbJsumPOiAYeAFZMlHf62b9dGs2HJ6Q5xt7xTB0uEyPeurwhgYBWGgabdsEidyj38YuzI/c3LGBbSQB3vagw=="
+    },
+    "@napi-rs/canvas-linux-arm64-gnu@0.1.68": {
+      "integrity": "sha512-KFkn8wEm3mPnWD4l8+OUUkxylSJuN5q9PnJRZJgv15RtCA1bgxIwTkBhI/+xuyVMcHqON9sXq7cDkEJtHm35dg=="
+    },
+    "@napi-rs/canvas-linux-arm64-musl@0.1.68": {
+      "integrity": "sha512-IQzts91rCdOALXBWQxLZRCEDrfFTGDtNRJMNu+2SKZ1uT8cmPQkPwVk5rycvFpvgAcmiFiOSCp1aRrlfU8KPpQ=="
+    },
+    "@napi-rs/canvas-linux-riscv64-gnu@0.1.68": {
+      "integrity": "sha512-e9AS5UttoIKqXSmBzKZdd3NErSVyOEYzJfNOCGtafGk1//gibTwQXGlSXmAKuErqMp09pyk9aqQRSYzm1AQfBw=="
+    },
+    "@napi-rs/canvas-linux-x64-gnu@0.1.68": {
+      "integrity": "sha512-Pa/I36VE3j57I3Obhrr+J48KGFfkZk2cJN/2NmW/vCgmoF7kCP6aTVq5n+cGdGWLd/cN9CJ9JvNwEoMRDghu0g=="
+    },
+    "@napi-rs/canvas-linux-x64-musl@0.1.68": {
+      "integrity": "sha512-9c6rkc5195wNxuUHJdf4/mmnq433OQey9TNvQ9LspJazvHbfSkTij8wtKjASVQsJyPDva4fkWOeV/OQ7cLw0GQ=="
+    },
+    "@napi-rs/canvas-win32-x64-msvc@0.1.68": {
+      "integrity": "sha512-Fc5Dez23u0FoSATurT6/w1oMytiRnKWEinHivdMvXpge6nG4YvhrASrtqMk8dGJMVQpHr8QJYF45rOrx2YU2Aw=="
+    },
+    "@napi-rs/canvas@0.1.68": {
+      "integrity": "sha512-LQESrePLEBLvhuFkXx9jjBXRC2ClYsO5mqQ1m/puth5z9SOuM3N/B3vDuqnC3RJFktDktyK9khGvo7dTkqO9uQ==",
+      "dependencies": [
+        "@napi-rs/canvas-android-arm64",
+        "@napi-rs/canvas-darwin-arm64",
+        "@napi-rs/canvas-darwin-x64",
+        "@napi-rs/canvas-linux-arm-gnueabihf",
+        "@napi-rs/canvas-linux-arm64-gnu",
+        "@napi-rs/canvas-linux-arm64-musl",
+        "@napi-rs/canvas-linux-riscv64-gnu",
+        "@napi-rs/canvas-linux-x64-gnu",
+        "@napi-rs/canvas-linux-x64-musl",
+        "@napi-rs/canvas-win32-x64-msvc"
+      ]
+    },
     "@types/codemirror@5.60.8": {
       "integrity": "sha512-VjFgDF/eB+Aklcy15TtOTLQeMjTo07k7KAjql8OK5Dirr7a6sJY4T1uVBDuTVG9VEmn1uUsohOpYnVfgC6/jyw==",
       "dependencies": [
@@ -107,6 +154,12 @@
     },
     "@types/estree@1.0.6": {
       "integrity": "sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw=="
+    },
+    "@types/node@22.5.4": {
+      "integrity": "sha512-FDuKUJQm/ju9fT/SeX/6+gBzoPzlVCzfzmGkwKvRHQVxi4BntVbyIwf6a4Xn62mrvndLiml6z/UBXIdEVjQLXg==",
+      "dependencies": [
+        "undici-types"
+      ]
     },
     "@types/tern@0.23.9": {
       "integrity": "sha512-ypzHFE/wBzh+BlH6rrBgS5I/Z7RD21pGhZ2rltb/+ZrVM1awdZwjx7hE5XfuYgHWk9uvV5HLZN3SloevCAp3Bw==",
@@ -156,21 +209,34 @@
         "moment"
       ]
     },
+    "pdfjs-dist@5.0.375": {
+      "integrity": "sha512-QDRlEVldf/cX88CElGAyRhjqNOO69kmB3HZlalDAfqJ/IvmqJNkipomhBZy4cWATfLVlkQTXE3H4yFvMF2uPsg==",
+      "dependencies": [
+        "@napi-rs/canvas"
+      ]
+    },
     "squirrelly@9.1.0": {
       "integrity": "sha512-kvjFqb7qzC4gX4lkqSaU8QPvUHhDLMiDpxpz7a66vjTH0JtjLJqAXbPrc7ST61EefuuuW05sne2rjGskunrF2A=="
     },
     "style-mod@4.1.2": {
       "integrity": "sha512-wnD1HyVqpJUI2+eKZ+eo1UwghftP6yuFheBqqe+bWCotBjC2K1YnteJILRMs3SM4V/0dLEW1SC27MWP5y+mwmw=="
     },
+    "undici-types@6.19.8": {
+      "integrity": "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="
+    },
     "w3c-keyname@2.2.8": {
       "integrity": "sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ=="
     }
+  },
+  "remote": {
+    "https://raw.githubusercontent.com/mozilla/pdfjs-dist/refs/heads/master/legacy/build/pdf.worker.min.js": "c0cb866ed180093140de1bb00a68781178c6c1ba8f46033d908ca47a96881197"
   },
   "workspace": {
     "dependencies": [
       "jsr:@std/semver@^1.0.4",
       "npm:esbuild@0.25",
       "npm:obsidian@^1.7.2",
+      "npm:pdfjs-dist@^5.0.375",
       "npm:squirrelly@^9.1.0"
     ]
   }

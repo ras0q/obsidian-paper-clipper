@@ -2,6 +2,7 @@ import { base64ToArrayBuffer, Notice, Plugin } from "obsidian";
 import { DoiInputModal } from "./views/DoiInputModal.ts";
 import { DEFAULT_SETTINGS, Settings, SettingTab } from "./views/SettingTab.ts";
 import { Reference } from "./reference.ts";
+import { extractPDFTitle } from "./services/pdf_extraction.ts";
 
 const fallbackTemplate = `---
 title: "{{ it.title }}"
@@ -51,12 +52,26 @@ export default class AcademicPaperManagementPlugin extends Plugin {
     // obsidian://clip-paper?file=papers%2Fexample.pdf&open=true
     this.registerObsidianProtocolHandler("clip-paper", async (params) => {
       try {
-        const { file = `papers/${Date.now()}.pdf`, open } = params;
+        const { open } = params;
 
         const copiedBase64 = await navigator.clipboard.readText();
         const pdf = base64ToArrayBuffer(copiedBase64);
 
-        const filePath = decodeURIComponent(file);
+        const title = await extractPDFTitle(pdf.slice(0));
+        const references = await Reference.fromTitle(
+          title,
+          this.settings.email,
+        );
+        const bestReference = references[0];
+
+        const dirname = bestReference
+          .parseTemplate(this.settings.directoryTemplate)
+          .replace(invalidFilenameCharacters, "_");
+        const filename = bestReference
+          .parseTemplate(this.settings.filenameTemplate)
+          .replace(invalidFilenameCharacters, "_");
+        const filePath = `${dirname}/${filename.replace(/\.pdf$/, "")}.pdf`;
+
         const pdfFile = this.app.vault.getFileByPath(filePath);
         if (pdfFile) {
           const confirm = globalThis.confirm(
@@ -75,6 +90,7 @@ export default class AcademicPaperManagementPlugin extends Plugin {
           }
         }
       } catch (e) {
+        console.error(e);
         new Notice(e as string);
       }
     });

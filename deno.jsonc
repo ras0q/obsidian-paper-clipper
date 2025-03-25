@@ -18,6 +18,7 @@
     "@std/semver": "jsr:@std/semver@^1.0.4",
     "esbuild": "npm:esbuild@^0.25.0",
     "obsidian": "npm:obsidian@^1.7.2",
+    "pdfjs-dist": "npm:pdfjs-dist@^5.0.375",
     "squirrelly": "npm:squirrelly@^9.1.0"
   },
   "nodeModulesDir": "auto",
