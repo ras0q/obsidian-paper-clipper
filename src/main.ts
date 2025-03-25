@@ -125,10 +125,20 @@ export default class AcademicPaperManagementPlugin extends Plugin {
   }
 
   private async savePDF(reference: Reference, pdf: ArrayBuffer) {
+    if (!this.settings.pdf.enable) return;
+
     const pdfPath = reference.parseTemplate(
-      this.settings.pdfPathTemplate,
+      this.settings.pdf.outputPath,
       { escape: true },
     );
+
+    if (this.settings.pdf.confirmToSave) {
+      const confirm = globalThis.confirm(
+        `Do you want to save the PDF file to ${pdfPath}?`,
+      );
+      if (!confirm) return;
+    }
+
     await this.prepareFolder(pdfPath);
 
     let pdfFile = this.app.vault.getFileByPath(pdfPath);
@@ -146,20 +156,30 @@ export default class AcademicPaperManagementPlugin extends Plugin {
   }
 
   private async generateReferenceNote(reference: Reference) {
+    if (!this.settings.reference.enable) return;
+
+    const referencePath = reference.parseTemplate(
+      this.settings.reference.outputPath,
+      { escape: true },
+    );
+
+    if (this.settings.reference.confirmToSave) {
+      const confirm = globalThis.confirm(
+        `Do you want to save the reference note to ${referencePath}?`,
+      );
+      if (!confirm) return;
+    }
+
+    await this.prepareFolder(referencePath);
+
     const templateFile = this.app.vault.getFileByPath(
-      this.settings.templatePath,
+      this.settings.reference.templatePath,
     );
 
     const template = templateFile
       ? await this.app.vault.read(templateFile)
       : fallbackTemplate;
     const content = reference.parseTemplate(template);
-
-    const referencePath = reference.parseTemplate(
-      this.settings.referencePathTemplate,
-      { escape: true },
-    );
-    await this.prepareFolder(referencePath);
 
     const referenceFile = await this.app.vault.create(referencePath, content);
 

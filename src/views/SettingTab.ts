@@ -3,16 +3,32 @@ import AcademicPaperManagementPlugin from "../main.ts";
 
 export interface Settings {
   email: string;
-  pdfPathTemplate: string;
-  referencePathTemplate: string;
-  templatePath: string;
+  pdf: {
+    enable: boolean;
+    confirmToSave: boolean;
+    outputPath: string;
+  };
+  reference: {
+    enable: boolean;
+    confirmToSave: boolean;
+    outputPath: string;
+    templatePath: string;
+  };
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   email: "",
-  pdfPathTemplate: "Papers/{{ it.year }}/{{ it.title }}.pdf",
-  referencePathTemplate: "Papers/{{ it.year }}/{{ it.title }}.md",
-  templatePath: "",
+  pdf: {
+    enable: true,
+    confirmToSave: false,
+    outputPath: "Papers/{{ it.year }}/{{ it.title }}.pdf",
+  },
+  reference: {
+    enable: true,
+    confirmToSave: false,
+    outputPath: "Papers/{{ it.year }}/{{ it.title }}.md",
+    templatePath: "",
+  },
 };
 
 export class SettingTab extends PluginSettingTab {
@@ -92,48 +108,100 @@ export class SettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("PDF Path Template")
-      .setDesc(
-        "The template for the path of the PDF files\n" +
-          "Unknown characters in filenames will be replaced by underscores",
-      )
-      .addText((text) =>
-        text
-          .setPlaceholder(DEFAULT_SETTINGS.pdfPathTemplate)
-          .setValue(this.plugin.settings.pdfPathTemplate)
+      .setName("Save PDFs")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.pdf.enable)
           .onChange((value) => {
-            this.plugin.settings.pdfPathTemplate = value;
+            this.plugin.settings.pdf.enable = value;
             this.plugin.saveSettings();
+            this.display();
           })
       );
 
+    if (this.plugin.settings.pdf.enable) {
+      new Setting(containerEl)
+        .setName("Confirm to save PDF")
+        .setDesc("Ask for confirmation before saving a PDF file")
+        .addToggle((toggle) =>
+          toggle
+            .setValue(this.plugin.settings.pdf.confirmToSave)
+            .onChange((value) => {
+              this.plugin.settings.pdf.confirmToSave = value;
+              this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName("PDF path template")
+        .setDesc(
+          "The template for the path of the PDF files\n" +
+            "Unknown characters in filenames will be replaced by underscores",
+        )
+        .addText((text) =>
+          text
+            .setPlaceholder(DEFAULT_SETTINGS.pdf.outputPath)
+            .setValue(this.plugin.settings.pdf.outputPath)
+            .onChange((value) => {
+              this.plugin.settings.pdf.outputPath = value;
+              this.plugin.saveSettings();
+            })
+        );
+    }
+
     new Setting(containerEl)
-      .setName("Reference Path Template")
-      .setDesc(
-        "The template for the path of the reference notes\n" +
-          "Unknown characters in filenames will be replaced by underscores",
-      )
-      .addText((text) =>
-        text
-          .setPlaceholder(DEFAULT_SETTINGS.referencePathTemplate)
-          .setValue(this.plugin.settings.referencePathTemplate)
+      .setName("Save reference notes")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.reference.enable)
           .onChange((value) => {
-            this.plugin.settings.referencePathTemplate = value;
+            this.plugin.settings.reference.enable = value;
             this.plugin.saveSettings();
+            this.display();
           })
       );
 
-    new Setting(containerEl)
-      .setName("Template path")
-      .setDesc("The path to the template for the reference notes.")
-      .addText((text) =>
-        text
-          .setPlaceholder("path/to/template.md")
-          .setValue(this.plugin.settings.templatePath)
-          .onChange((value) => {
-            this.plugin.settings.templatePath = value;
-            this.plugin.saveSettings();
-          })
-      );
+    if (this.plugin.settings.reference.enable) {
+      new Setting(containerEl)
+        .setName("Confirm to save reference note")
+        .setDesc("Ask for confirmation before saving a reference note")
+        .addToggle((toggle) =>
+          toggle
+            .setValue(this.plugin.settings.reference.confirmToSave)
+            .onChange((value) => {
+              this.plugin.settings.reference.confirmToSave = value;
+              this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName("Reference path template")
+        .setDesc(
+          "The template for the path of the reference notes\n" +
+            "Unknown characters in filenames will be replaced by underscores",
+        )
+        .addText((text) =>
+          text
+            .setPlaceholder(DEFAULT_SETTINGS.reference.outputPath)
+            .setValue(this.plugin.settings.reference.outputPath)
+            .onChange((value) => {
+              this.plugin.settings.reference.outputPath = value;
+              this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName("Template path")
+        .setDesc("The path to the template for the reference notes.")
+        .addText((text) =>
+          text
+            .setPlaceholder("path/to/template.md")
+            .setValue(this.plugin.settings.reference.templatePath)
+            .onChange((value) => {
+              this.plugin.settings.reference.templatePath = value;
+              this.plugin.saveSettings();
+            })
+        );
+    }
   }
 }
