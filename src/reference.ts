@@ -14,8 +14,7 @@ interface UnpaywallResponse {
     url_for_pdf?: string;
   };
   z_authors: {
-    given: string;
-    family: string;
+    raw_author_name: string;
   }[];
   [key: string]: unknown;
 }

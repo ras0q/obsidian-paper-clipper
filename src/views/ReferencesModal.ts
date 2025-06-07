@@ -20,7 +20,7 @@ export class ReferencesModal extends FuzzySuggestModal<Reference> {
     const { title, z_authors } = item.data;
     return `${title} - ${
       (z_authors || [])
-        .map((author) => `${author.given} ${author.family}`)
+        .map((author) => `${author.raw_author_name}`)
         .join(", ")
     }`;
   }

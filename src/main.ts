@@ -9,7 +9,7 @@ const fallbackTemplate = `---
 title: "{{ it.title }}"
 author:
 {{ @each(it.z_authors) => val, i }}
-  - "{{ val.given }} {{ val.family }}"
+  - "{{ val.raw_author_name }}"
 {{ /each }}
 doi: "{{ it.doi }}"
 url: "{{ it.doi_url }}"
